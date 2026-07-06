@@ -786,11 +786,12 @@
         return;
       }
       if (fbMode) {
+        // Try anonymous sign-in (needed only if DB rules require auth to write).
+        // If it's disabled, DON'T block: while the rules are open (test mode)
+        // writes still succeed. To harden later, enable Anonymous sign-in +
+        // publish the locked rules from FIREBASE-SETUP.md.
         try { await FB.auth().signInAnonymously(); }
-        catch (err) {
-          $('#loginErr').textContent = 'تعذّر الاتصال بـFirebase — فعّل «Anonymous» في Authentication';
-          return;
-        }
+        catch (err) { console.warn('Anonymous sign-in unavailable — continuing with open rules.', err); }
       }
       afterUnlock();
     });
