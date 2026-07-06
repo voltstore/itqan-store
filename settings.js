@@ -18,7 +18,7 @@ globalThis.ITQAN_SETTINGS = {
   "ai": {
     "provider": "anthropic",
     "model": "claude-haiku-4-5",
-    "proxyUrl": "",
+    "proxyUrl": "https://itcanstore.nosososo68.workers.dev/",
     "apiKey": ""
   },
   "admin": {
