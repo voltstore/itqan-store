@@ -140,6 +140,8 @@ const I18N = {
     'footer.credit': 'صُنع بإتقان — اتقان © 2026',
 
     /* chat */
+    'wa.label': 'تواصل واتساب',
+    'wa.aria': 'تواصل مع المتجر عبر واتساب',
     'chat.open': 'فتح مساعد اتقان الذكي',
     'chat.title': 'مساعد اتقان الذكي',
     'chat.subtitle': 'يرشّح من مخزون المتجر فقط',
@@ -292,6 +294,8 @@ const I18N = {
     'footer.wa': 'Store WhatsApp',
     'footer.credit': 'Crafted with precision — Itqan © 2026',
 
+    'wa.label': 'Chat on WhatsApp',
+    'wa.aria': 'Contact the store on WhatsApp',
     'chat.open': 'Open Itqan AI assistant',
     'chat.title': 'Itqan AI Assistant',
     'chat.subtitle': 'Recommends from store stock only',

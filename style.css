@@ -807,9 +807,35 @@ code { font-family: var(--mono); }
 .toast.is-visible { opacity: 1; transform: translate(50%, 0); }
 [dir='ltr'] .toast.is-visible { transform: translate(-50%, 0); }
 
+/* -------------------------------------------------------- whatsapp float */
+.wa-fab {
+  position: fixed; bottom: 22px; left: 22px; z-index: 130;
+  display: inline-flex; align-items: center; gap: 0;
+  height: 58px; border-radius: 999px;
+  background: #25D366; color: #fff;
+  box-shadow: 0 8px 24px -6px rgba(37, 211, 102, 0.6), var(--shadow-1);
+  overflow: hidden; white-space: nowrap;
+  transition: transform var(--dur-fast) var(--spring), gap var(--dur-med) var(--ease), padding var(--dur-med) var(--ease);
+  padding: 0; width: 58px;
+}
+.wa-fab__icon { flex: none; width: 58px; height: 58px; display: grid; place-items: center; }
+.wa-fab__icon svg { width: 30px; height: 30px; }
+.wa-fab__label { max-width: 0; opacity: 0; font-weight: 700; font-size: 0.9rem; transition: max-width var(--dur-med) var(--ease), opacity var(--dur-fast) var(--ease); }
+.wa-fab:hover, .wa-fab:focus-visible {
+  transform: translateY(-3px); width: auto; padding-inline-end: 20px; outline: none;
+}
+.wa-fab:hover .wa-fab__label, .wa-fab:focus-visible .wa-fab__label { max-width: 200px; opacity: 1; }
+.wa-fab:active { transform: scale(0.94); }
+.wa-fab::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); animation: wa-pulse 2.4s ease-out infinite;
+}
+@keyframes wa-pulse { 70% { box-shadow: 0 0 0 16px rgba(37, 211, 102, 0); } 100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); } }
+@media (prefers-reduced-motion: reduce) { .wa-fab::before { animation: none; } }
+
 /* ------------------------------------------------------------------ chat */
 .chat-toggle {
-  position: fixed; bottom: 22px; inset-inline-start: 22px; z-index: 130;
+  position: fixed; bottom: 22px; right: 22px; z-index: 130;
   width: 58px; height: 58px; border-radius: 999px;
   background: var(--accent-grad); color: var(--accent-contrast);
   box-shadow: var(--accent-glow), var(--shadow-1);
@@ -821,7 +847,7 @@ code { font-family: var(--mono); }
 .chat-toggle svg { width: 26px; height: 26px; }
 
 .chat-panel {
-  position: fixed; bottom: 92px; inset-inline-start: 22px; z-index: 135;
+  position: fixed; bottom: 92px; right: 22px; z-index: 135;
   width: min(392px, calc(100vw - 32px));
   height: min(568px, calc(100dvh - 130px));
   display: flex; flex-direction: column;

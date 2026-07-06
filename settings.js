@@ -14,7 +14,7 @@
  * =============================================================================
  */
 globalThis.ITQAN_SETTINGS = {
-  "whatsappPhone": "9665XXXXXXXX",
+  "whatsappPhone": "966542585400",
   "ai": {
     "provider": "anthropic",
     "model": "claude-haiku-4-5",
