@@ -222,6 +222,15 @@
       border-inline-start: 3px solid var(--warning); border-radius: var(--radius-m); padding: 12px 14px;
     }
     .warn-box code { font-size: 0.74rem; background: var(--surface-2); padding: 1px 6px; border-radius: 5px; }
+    .social-list { list-style: none; display: grid; gap: 8px; margin: 8px 0 0; padding: 0; }
+    .social-empty { color: var(--text-2); font-size: 0.8rem; }
+    .social-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+    .social-item__ic { flex: none; width: 26px; height: 26px; display: grid; place-items: center; }
+    .social-item__ic svg { width: 20px; height: 20px; }
+    .social-item__meta { display: grid; flex: 1; min-width: 0; }
+    .social-item__meta b { font-size: 0.82rem; }
+    .social-item__meta span { font-size: 0.72rem; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; }
+    .social-item__del { flex: none; }
 
     @media (max-width: 900px) {
       .dash { grid-template-columns: 1fr; }
@@ -427,6 +436,20 @@
           <b>🔒 الموصى به:</b> استخدم <b>الخادم الوسيط</b> — المفتاح يبقى على Cloudflare ولا يصل متصفح الزائر أبدًا.
           حقل «المفتاح المباشر» احتياطي فقط؛ على المواقع العامة يمكن لأي زائر تقني استخراجه، فلا تستخدمه إلا للتجربة وبمفتاح محدود الإنفاق.
         </div>
+
+        <p class="dyn-title" style="margin-top:6px">حسابات التواصل الاجتماعي (تظهر في تذييل المتجر)</p>
+        <div class="field-row">
+          <div class="field">
+            <label for="socialPlatform">المنصّة</label>
+            <select id="socialPlatform"></select>
+          </div>
+          <div class="field">
+            <label for="socialUrl">رابط الحساب</label>
+            <input type="url" id="socialUrl" dir="ltr" autocomplete="off" placeholder="https://instagram.com/itqan">
+          </div>
+        </div>
+        <button type="button" class="btn btn--ghost btn--small" id="socialAdd">＋ إضافة الحساب</button>
+        <ul class="social-list" id="socialList"></ul>
       </div>
       <div class="pd-foot">
         <button type="button" class="btn btn--ghost" id="setCancel">إلغاء</button>
@@ -480,6 +503,7 @@
   <script src="settings.js"></script>
   <script src="inventory.js"></script>
   <script src="data.js"></script>
+  <script src="social.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

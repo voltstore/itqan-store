@@ -36,6 +36,7 @@
   let db = fbMode ? emptyDB() : structuredClone(globalThis.ITQAN_INVENTORY);
   let settings = structuredClone(globalThis.ITQAN_SETTINGS || { whatsappPhone: '' });
   if (!settings.ai) settings.ai = { provider: 'anthropic', model: 'claude-haiku-4-5', apiKey: '' };
+  if (!Array.isArray(settings.social)) settings.social = [];
 
   /** المساعد مثبّت على Claude فقط (Anthropic). لا يمكن تغيير المزوّد. */
   const AI_PROVIDERS = {
@@ -293,12 +294,42 @@
     $('#keyHint').textContent = cfg.hint;
   }
 
+  /* ---- social accounts (platform dropdown + url + icon) ---- */
+  const SOCIAL = globalThis.SOCIAL_PLATFORMS || {};
+  let socialDraft = [];   // working copy while the dialog is open
+
+  function socialIcon(key) {
+    const p = SOCIAL[key];
+    return p ? `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${p.svg}</svg>` : '';
+  }
+
+  function renderSocialList() {
+    const list = $('#socialList');
+    if (!socialDraft.length) { list.innerHTML = '<li class="social-empty">لا توجد حسابات بعد.</li>'; return; }
+    list.innerHTML = socialDraft.map((s, i) => {
+      const p = SOCIAL[s.platform];
+      const name = p ? p.label.ar : s.platform;
+      return `<li class="social-item">
+        <span class="social-item__ic" style="color:${p ? p.color : 'var(--text-2)'}">${socialIcon(s.platform)}</span>
+        <span class="social-item__meta"><b>${esc(name)}</b><span dir="ltr">${esc(s.url)}</span></span>
+        <button type="button" class="rb social-item__del" data-i="${i}" aria-label="حذف">✕</button>
+      </li>`;
+    }).join('');
+  }
+
   function fillSettingsForm() {
     $('#setWhatsapp').value = settings.whatsappPhone || '';
     const ai = settings.ai || {};
     renderModelOptions(ai.model);
     $('#setProxyUrl').value = ai.proxyUrl || '';
     $('#setApiKey').value = ai.apiKey || '';
+    // populate platform dropdown once
+    if (!$('#socialPlatform').options.length) {
+      $('#socialPlatform').innerHTML = Object.keys(SOCIAL)
+        .map((k) => `<option value="${k}">${esc(SOCIAL[k].label.ar)}</option>`).join('');
+    }
+    socialDraft = Array.isArray(settings.social) ? structuredClone(settings.social) : [];
+    renderSocialList();
   }
 
   async function saveSettings() {
@@ -311,6 +342,7 @@
       proxyUrl: $('#setProxyUrl').value.trim(),
       apiKey: $('#setApiKey').value.trim(),
     };
+    settings.social = socialDraft.slice();
     try {
       if (fbMode) {
         await FB.db().ref('itqan/settings').set(settings);
@@ -652,6 +684,7 @@
       const st = await FB.db().ref('itqan/settings').once('value');
       settings = st.val() || structuredClone(globalThis.ITQAN_SETTINGS || {});
       if (!settings.ai) settings.ai = { provider: 'anthropic', model: 'claude-haiku-4-5', apiKey: '' };
+  if (!Array.isArray(settings.social)) settings.social = [];
       settings.ai.provider = 'anthropic';   // enforce Claude-only even on old cloud data
       renderAll();
     } catch (e) {
@@ -855,6 +888,23 @@
     $('#setCancel').addEventListener('click', () => $('#settingsDialog').close());
     $('#setClose').addEventListener('click', () => $('#settingsDialog').close());
     // provider is locked to Claude — no provider selector to wire up
+
+    // social accounts: add + remove (icons come from social.js)
+    $('#socialAdd').addEventListener('click', () => {
+      const platform = $('#socialPlatform').value;
+      let url = $('#socialUrl').value.trim();
+      if (!url) { toast('الصق رابط الحساب أولًا'); return; }
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      socialDraft.push({ platform, url });
+      $('#socialUrl').value = '';
+      renderSocialList();
+    });
+    $('#socialList').addEventListener('click', (e) => {
+      const del = e.target.closest('.social-item__del');
+      if (!del) return;
+      socialDraft.splice(Number(del.dataset.i), 1);
+      renderSocialList();
+    });
 
     $('#searchInput').addEventListener('input', (e) => { query = e.target.value.trim(); renderNav(); renderTable(); });
     $('#sortSel').addEventListener('change', (e) => { sortMode = e.target.value; renderTable(); });

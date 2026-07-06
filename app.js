@@ -449,6 +449,25 @@
     renderPartsGrid();
     renderStatusBar();
     renderCart();
+    renderSocial();
+  }
+
+  /** Render the store's social-account icons in the footer (from settings). */
+  function renderSocial() {
+    const row = document.getElementById('socialRow');
+    if (!row) return;
+    const cat = globalThis.SOCIAL_PLATFORMS || {};
+    const list = Array.isArray(storeSettings.social) ? storeSettings.social : [];
+    row.innerHTML = list
+      .filter((s) => s && s.url && cat[s.platform])
+      .map((s) => {
+        const p = cat[s.platform];
+        const name = p.label[lang] || p.label.ar;
+        return `<a class="social-link" href="${esc(s.url)}" target="_blank" rel="noopener"
+                   style="--sc:${p.color}" aria-label="${esc(name)}" title="${esc(name)}">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${p.svg}</svg>
+                </a>`;
+      }).join('');
   }
 
   /* ======================================================================

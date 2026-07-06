@@ -21,6 +21,7 @@ globalThis.ITQAN_SETTINGS = {
     "proxyUrl": "https://itcanstore.nosososo68.workers.dev/",
     "apiKey": ""
   },
+  "social": [],
   "admin": {
     "mode": "user",
     "user": "123",
