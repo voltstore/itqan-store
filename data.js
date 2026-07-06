@@ -75,7 +75,7 @@ async function getParts() {
   const FB = globalThis.ItqanFB;
   if (FB && FB.ready()) {
     try {
-      const snap = await FB.db().ref('inventory').once('value');
+      const snap = await FB.db().ref('itqan/inventory').once('value');
       const val = snap.val();
       if (val) return normalizeInventory(val);
     } catch (e) {
@@ -95,7 +95,7 @@ async function getSettings() {
   const FB = globalThis.ItqanFB;
   if (FB && FB.ready()) {
     try {
-      const snap = await FB.db().ref('settings').once('value');
+      const snap = await FB.db().ref('itqan/settings').once('value');
       const val = snap.val();
       if (val) return val;
     } catch (e) {

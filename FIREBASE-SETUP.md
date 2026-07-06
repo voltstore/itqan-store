@@ -35,11 +35,16 @@
 ## 4) ضع قواعد الأمان (قراءة عامة، كتابة للمشرف فقط)
 
 ### Realtime Database → Rules
+> ⚠️ قاعدة البيانات `imam-warsh` **مشتركة مع مشروع آخر لك**. لذلك بيانات المتجر
+> معزولة تحت مسار `itqan/` حتى لا تتضارب. لا تنشر قواعد تقفل بقية المسارات وإلا
+> تتعطّل مشاريعك الأخرى — أضف قاعدة `itqan` فقط إلى قواعدك الحالية:
 ```json
 {
   "rules": {
-    "inventory": { ".read": true, ".write": "auth != null" },
-    "settings":  { ".read": true, ".write": "auth != null" }
+    "itqan": {
+      "inventory": { ".read": true, ".write": "auth != null" },
+      "settings":  { ".read": true, ".write": "auth != null" }
+    }
   }
 }
 ```
@@ -77,7 +82,7 @@ service firebase.storage {
 - **الاستضافة**: لكي يعمل عند الجميع، ارفع الملفات على استضافة (Firebase Hosting، GitHub Pages...).
   محليًا عبر `file://` قد يمنع تسجيل الدخول أحيانًا — استخدم استضافة أو `localhost`.
   (Firebase Hosting: ثبّت `npm i -g firebase-tools` ثم `firebase init hosting` و `firebase deploy`.)
-- **مفتاح الـAI**: يُحفظ ضمن `settings` وقراءته عامة (كما هو الحال في أي موقع بلا خادم).
-  للسرية الكاملة استخدم **Cloud Function** كوسيط يخفي المفتاح — خطوة لاحقة.
+- **مفتاح الـAI**: **لا يُحفظ في Firebase إطلاقًا** — يبقى سريًّا على الخادم الوسيط
+  (Cloudflare Worker). طريقة الإعداد في [`WORKER-SETUP.md`](WORKER-SETUP.md).
 - **العودة للوضع المحلي**: أعِد `firebase-config.js` لقيمه الافتراضية (XXXX) ليعمل الموقع
   من الملفات المحلية بدون Firebase.

@@ -199,7 +199,7 @@
   }
 
   async function writeInventory() {
-    if (fbMode) { await FB.db().ref('inventory').set(db); return true; }
+    if (fbMode) { await FB.db().ref('itqan/inventory').set(db); return true; }
     if (!dirHandle) return false;
     const fh = await dirHandle.getFileHandle('inventory.js', { create: true });
     const w = await fh.createWritable();
@@ -291,7 +291,7 @@
     };
     try {
       if (fbMode) {
-        await FB.db().ref('settings').set(settings);
+        await FB.db().ref('itqan/settings').set(settings);
         toast('تم حفظ الإعدادات في Firebase ✓');
       } else if (dirHandle) {
         const fh = await dirHandle.getFileHandle('settings.js', { create: true });
@@ -625,9 +625,9 @@
   /** Read inventory + settings straight from Firebase (empty cloud = empty). */
   async function loadFromCloud() {
     try {
-      const inv = await FB.db().ref('inventory').once('value');
+      const inv = await FB.db().ref('itqan/inventory').once('value');
       db = normalizeInv(inv.val());
-      const st = await FB.db().ref('settings').once('value');
+      const st = await FB.db().ref('itqan/settings').once('value');
       settings = st.val() || structuredClone(globalThis.ITQAN_SETTINGS || {});
       if (!settings.ai) settings.ai = { provider: 'anthropic', model: 'claude-haiku-4-5', apiKey: '' };
       settings.ai.provider = 'anthropic';   // enforce Claude-only even on old cloud data
@@ -669,8 +669,8 @@
   async function seedToFirebase() {
     if (!confirm('سيتم رفع بيانات inventory.js و settings.js المحلية إلى Firebase (تكتب فوق الموجود). متابعة؟')) return;
     try {
-      await FB.db().ref('inventory').set(structuredClone(globalThis.ITQAN_INVENTORY));
-      await FB.db().ref('settings').set(structuredClone(globalThis.ITQAN_SETTINGS || {}));
+      await FB.db().ref('itqan/inventory').set(structuredClone(globalThis.ITQAN_INVENTORY));
+      await FB.db().ref('itqan/settings').set(structuredClone(globalThis.ITQAN_SETTINGS || {}));
       toast('تم رفع البيانات المحلية إلى Firebase ✓');
       loadFromCloud();
     } catch (e) {
