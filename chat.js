@@ -6,24 +6,25 @@
  * configured ONCE by the store owner in admin.html (→ settings.js), so the
  * assistant works for every visitor without them entering anything.
  *
- * Supported providers (direct REST fetch, no SDK, no backend):
- *   - gemini    → Google Gemini            (models: gemini-2.0-flash, 2.5-flash)
- *   - openai    → OpenAI / ChatGPT         (gpt-4o-mini, gpt-4o, gpt-4.1-mini)
- *   - anthropic → Anthropic / Claude       (claude-haiku-4-5, sonnet-5, opus-4-8)
+ * LOCKED TO CLAUDE (Anthropic). Customers cannot change provider, model, or key.
  *
- * ⚠️ SECURITY: a key placed in settings.js is served to every visitor and is
- *    therefore public. Use a spend-limited key. The safe long-term fix is a
- *    tiny server-side proxy (Phase 2 / Firebase Functions) that holds the key.
+ * Two request modes (chosen by store settings):
+ *   - proxy  → POST to a Cloudflare Worker that holds the key server-side.
+ *              The browser never sees the key. This is the secure default.
+ *   - direct → legacy fallback: the key travels from the browser (exposed).
  *
- * Fallback: if the owner hasn't configured a key, a visitor can paste their own
- * (stored only in their localStorage) — the original per-user flow.
+ * The owner configures the proxy URL (or key) ONCE in admin.html → settings,
+ * so the assistant works for every visitor without them entering anything.
  * =============================================================================
  */
 (function () {
   'use strict';
 
-  const KEY_STORAGE = 'itqan-ai-key';   // per-user fallback key (localStorage)
   const MAX_HISTORY = 12;
+  // Locked: the assistant is Claude-only. Customers cannot change provider,
+  // model, or key — it is admin-controlled and served from the store settings.
+  const LOCKED_PROVIDER = 'anthropic';
+  const DEFAULT_MODEL = 'claude-haiku-4-5';
 
   /* ---------------------------------------------------------------- state */
   let history = [];        // [{role:'user'|'model', text}]
@@ -60,74 +61,6 @@
       .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   }
 
-  /* ======================================================================
-   * PROVIDER ABSTRACTION — each maps (systemPrompt, history, cfg) to a
-   * request, and a raw response back to text. Roles: our history uses
-   * 'user'/'model'; OpenAI + Anthropic want 'assistant' instead of 'model'.
-   * ==================================================================== */
-  const roleFor = (m, modelRole) => (m.role === 'model' ? modelRole : 'user');
-
-  const PROVIDERS = {
-    gemini: {
-      label: 'Google Gemini',
-      build(sys, hist, cfg) {
-        const model = cfg.model || 'gemini-2.0-flash';
-        return {
-          url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cfg.key)}`,
-          headers: { 'Content-Type': 'application/json' },
-          body: {
-            systemInstruction: { parts: [{ text: sys }] },
-            contents: hist.map((m) => ({ role: m.role, parts: [{ text: m.text }] })),
-            generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
-          },
-        };
-      },
-      parse: (d) => (d.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('').trim(),
-    },
-
-    openai: {
-      label: 'OpenAI · ChatGPT',
-      build(sys, hist, cfg) {
-        return {
-          url: 'https://api.openai.com/v1/chat/completions',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.key}` },
-          body: {
-            model: cfg.model || 'gpt-4o-mini',
-            max_tokens: 1024,
-            temperature: 0.4,
-            messages: [
-              { role: 'system', content: sys },
-              ...hist.map((m) => ({ role: roleFor(m, 'assistant'), content: m.text })),
-            ],
-          },
-        };
-      },
-      parse: (d) => (d.choices?.[0]?.message?.content || '').trim(),
-    },
-
-    anthropic: {
-      label: 'Anthropic · Claude',
-      build(sys, hist, cfg) {
-        // NOTE: no `temperature` — it's rejected (400) on Opus 4.8 / Sonnet 5.
-        return {
-          url: 'https://api.anthropic.com/v1/messages',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': cfg.key,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true',
-          },
-          body: {
-            model: cfg.model || 'claude-haiku-4-5',
-            max_tokens: 1024,
-            system: sys,
-            messages: hist.map((m) => ({ role: roleFor(m, 'assistant'), content: m.text })),
-          },
-        };
-      },
-      parse: (d) => (d.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim(),
-    },
-  };
 
   /* ======================================================================
    * CONFIG RESOLUTION — admin (shared) first, then per-user fallback
@@ -138,17 +71,20 @@
     return s.ai || {};
   };
 
-  /** @returns {{provider,model,key,source}|null} */
+  /**
+   * Always Claude; customers never supply anything.
+   * - proxy mode  → requests go to a server-side proxy (Cloudflare Worker) that
+   *                 holds the key; the browser NEVER sees the key. Preferred.
+   * - direct mode → legacy fallback: key travels from the browser (exposed).
+   * @returns {{mode:'proxy'|'direct',url?,key?,model}|null}
+   */
   function getAIConfig() {
     const a = adminAI();
-    if (a.apiKey && a.apiKey.trim()) {
-      return { provider: a.provider || 'gemini', model: a.model, key: a.apiKey.trim(), source: 'admin' };
-    }
-    const uk = (localStorage.getItem(KEY_STORAGE) || '').trim();
-    if (uk) {
-      return { provider: a.provider || 'gemini', model: a.model || 'gemini-2.0-flash', key: uk, source: 'user' };
-    }
-    return null; // nothing configured anywhere
+    const proxyUrl = (a.proxyUrl || '').trim();
+    if (proxyUrl) return { mode: 'proxy', url: proxyUrl, model: a.model || DEFAULT_MODEL };
+    const key = (a.apiKey || '').trim();
+    if (key) return { mode: 'direct', key, model: a.model || DEFAULT_MODEL };
+    return null; // owner hasn't set up the assistant yet
   }
 
   /* ======================================================================
@@ -193,31 +129,16 @@
   }
 
   /* ======================================================================
-   * PER-USER KEY SETUP (fallback only — when the owner set no key)
+   * NOT-CONFIGURED NOTICE — shown when the owner hasn't set the store key.
+   * Customers never see a key field; they cannot supply their own.
    * ==================================================================== */
-  function renderKeySetup(isChange) {
-    screen = 'setup';
-    const provider = adminAI().provider || 'gemini';
-    const label = (PROVIDERS[provider] || PROVIDERS.gemini).label;
+  function renderNotConfigured() {
+    screen = 'none';
     els.messages.innerHTML = `
       <div class="chat-setup">
-        <p class="chat-setup__title">${isChange ? L('chat.setupChangeTitle') : L('chat.setupTitle')}</p>
-        <p class="chat-setup__text">${L('chat.setupText')} <b dir="ltr">${esc(label)}</b>.</p>
-        <form class="chat-setup__form" id="chatKeyForm">
-          <label class="sr-only" for="chatKeyInput">${L('chat.keyLabel')}</label>
-          <input id="chatKeyInput" type="password" dir="ltr" autocomplete="off" placeholder="..." required>
-          <button type="submit" class="btn btn--primary btn--small">${L('chat.saveKey')}</button>
-        </form>
+        <p class="chat-setup__title">${L('chat.offTitle')}</p>
+        <p class="chat-setup__text">${L('chat.offText')}</p>
       </div>`;
-    $('#chatKeyForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = $('#chatKeyInput').value.trim();
-      if (!val) return;
-      localStorage.setItem(KEY_STORAGE, val);
-      history = [];
-      renderWelcome();
-    });
-    $('#chatKeyInput').focus();
     setFormEnabled(false);
   }
 
@@ -311,17 +232,40 @@
    * API CALL (provider-dispatched)
    * ==================================================================== */
   function friendlyError(status) {
-    if (status === 400 || status === 401 || status === 403) return L('chat.errKey');
+    if (status === 400 || status === 401 || status === 403) return L('chat.errUnavailable');
     if (status === 429) return L('chat.errQuota');
     if (status === 0) return L('chat.errNet');
     return L('chat.errGeneric');
   }
 
+  /** Build the Claude request for the active mode (proxy hides the key). */
+  function buildRequest(cfg) {
+    const messages = history.slice(-MAX_HISTORY)
+      .map((m) => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.text }));
+    const body = { model: cfg.model || DEFAULT_MODEL, max_tokens: 1024, system: buildSystemPrompt(), messages };
+    if (cfg.mode === 'proxy') {
+      // No key in the browser — the Worker attaches it server-side.
+      return { url: cfg.url, headers: { 'Content-Type': 'application/json' }, body };
+    }
+    return {
+      url: 'https://api.anthropic.com/v1/messages',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body,
+    };
+  }
+
+  /** Both proxy and direct return Anthropic's native response shape. */
+  const parseReply = (d) => (d.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim();
+
   async function callAI() {
     const cfg = getAIConfig();
-    if (!cfg) throw new Error(L('chat.errKey'));
-    const provider = PROVIDERS[cfg.provider] || PROVIDERS.gemini;
-    const { url, headers, body } = provider.build(buildSystemPrompt(), history.slice(-MAX_HISTORY), cfg);
+    if (!cfg) throw new Error(L('chat.errUnavailable'));
+    const { url, headers, body } = buildRequest(cfg);
 
     let res;
     try {
@@ -332,7 +276,7 @@
     if (!res.ok) throw new Error(friendlyError(res.status));
 
     const data = await res.json();
-    const text = provider.parse(data);
+    const text = parseReply(data);
     if (!text) throw new Error(L('chat.errEmpty'));
     return text;
   }
@@ -378,10 +322,9 @@
   function syncSubtitle(cfg) {
     if (!els.subtitle) return;
     if (cfg) {
-      const label = (PROVIDERS[cfg.provider] || PROVIDERS.gemini).label;
       els.subtitle.textContent = getLang() === 'en'
-        ? `Powered by ${label} — recommends from store stock only`
-        : `مدعوم بـ ${label} — يرشّح من مخزون المتجر فقط`;
+        ? 'Powered by Claude — recommends from store stock only'
+        : 'مدعوم بـ Claude — يرشّح من مخزون المتجر فقط';
     } else {
       els.subtitle.textContent = L('chat.subtitle');
     }
@@ -393,11 +336,10 @@
 
     const cfg = getAIConfig();
     syncSubtitle(cfg);
-    // The per-user "change key" control only matters for the fallback flow.
-    els.settings.style.display = (cfg && cfg.source === 'admin') ? 'none' : '';
+    if (els.settings) els.settings.style.display = 'none'; // customers can't change anything
 
     if (!cfg) {
-      renderKeySetup(false);           // fallback: visitor supplies their own key
+      renderNotConfigured();
     } else if (history.length === 0 && screen !== 'chat') {
       renderWelcome();
     } else {
@@ -421,7 +363,7 @@
       els.panel.classList.contains('is-open') ? closeChat() : openChat();
     });
     els.close.addEventListener('click', closeChat);
-    els.settings.addEventListener('click', () => renderKeySetup(true));
+    if (els.settings) els.settings.style.display = 'none'; // no customer-facing AI settings
 
     els.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -433,8 +375,10 @@
     });
 
     document.addEventListener('itqan:lang', () => {
-      if (els.panel.classList.contains('is-open')) syncSubtitle(getAIConfig());
-      if (screen === 'setup') renderKeySetup(false);
+      if (!els.panel.classList.contains('is-open')) return;
+      const cfg = getAIConfig();
+      syncSubtitle(cfg);
+      if (!cfg) renderNotConfigured();
       else if (screen === 'chat' && history.length === 0) renderWelcome();
     });
   });

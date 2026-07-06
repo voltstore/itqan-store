@@ -197,6 +197,8 @@
     .field textarea { min-height: 58px; resize: vertical; }
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .field-note { font-size: 0.72rem; color: var(--text-2); }
+    .locked-field { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--text); font-weight: 600; font-size: 0.9rem; }
+    .locked-field span { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); padding: 3px 8px; border-radius: 999px; }
     .dyn-title { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-2); padding-top: 4px; border-top: 1px solid var(--border); margin-top: 2px; }
     .dyn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     #catField.is-locked select { opacity: .6; cursor: not-allowed; }
@@ -402,29 +404,28 @@
 
         <div class="field-row">
           <div class="field">
-            <label for="setProvider">مزوّد الذكاء الاصطناعي</label>
-            <select id="setProvider">
-              <option value="gemini">Google Gemini</option>
-              <option value="openai">OpenAI — ChatGPT</option>
-              <option value="anthropic">Anthropic — Claude</option>
-            </select>
+            <label>مزوّد الذكاء الاصطناعي</label>
+            <div class="locked-field">Anthropic — Claude <span>مثبّت</span></div>
           </div>
           <div class="field">
-            <label for="setModel">الموديل</label>
+            <label for="setModel">موديل Claude</label>
             <select id="setModel"></select>
           </div>
         </div>
         <div class="field">
-          <label for="setApiKey">مفتاح الـAPI</label>
-          <input type="password" id="setApiKey" dir="ltr" autocomplete="off" placeholder="ألصق المفتاح هنا">
+          <label for="setProxyUrl">رابط الخادم الوسيط (Cloudflare) — الطريقة الآمنة</label>
+          <input type="url" id="setProxyUrl" dir="ltr" autocomplete="off" placeholder="https://itqan-ai.اسمك.workers.dev">
+          <span class="field-note">عند ضبطه يعمل المساعد عبر الوسيط والمفتاح يبقى مخفيًا على الخادم. (طريقة الإعداد في ملف <code dir="ltr">WORKER-SETUP.md</code>)</span>
+        </div>
+        <div class="field">
+          <label for="setApiKey">مفتاح Claude API (احتياطي — غير آمن للمواقع العامة)</label>
+          <input type="password" id="setApiKey" dir="ltr" autocomplete="off" placeholder="sk-ant-... (اتركه فارغًا عند استخدام الوسيط)">
           <span class="field-note" id="keyHint"></span>
         </div>
 
         <div class="warn-box">
-          <b>⚠️ تنبيه أمني:</b> بما أن الموقع بدون خادم، فإن المفتاح يُحفظ في ملف
-          <code dir="ltr">settings.js</code> الذي يصل لكل زائر — <b>أي شخص يقدر يراه</b>.
-          استخدم مفتاحًا بحد إنفاق محدود، وراقب استهلاكه، وألغِه فورًا عند أي إساءة.
-          (الحل الآمن الكامل يأتي مع ربط الخادم في المرحلة القادمة.)
+          <b>🔒 الموصى به:</b> استخدم <b>الخادم الوسيط</b> — المفتاح يبقى على Cloudflare ولا يصل متصفح الزائر أبدًا.
+          حقل «المفتاح المباشر» احتياطي فقط؛ على المواقع العامة يمكن لأي زائر تقني استخراجه، فلا تستخدمه إلا للتجربة وبمفتاح محدود الإنفاق.
         </div>
       </div>
       <div class="pd-foot">

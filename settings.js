@@ -16,8 +16,9 @@
 globalThis.ITQAN_SETTINGS = {
   "whatsappPhone": "9665XXXXXXXX",
   "ai": {
-    "provider": "gemini",
-    "model": "gemini-2.0-flash",
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5",
+    "proxyUrl": "",
     "apiKey": ""
   },
   "admin": {

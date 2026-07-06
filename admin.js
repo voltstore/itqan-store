@@ -35,24 +35,14 @@
 
   let db = fbMode ? emptyDB() : structuredClone(globalThis.ITQAN_INVENTORY);
   let settings = structuredClone(globalThis.ITQAN_SETTINGS || { whatsappPhone: '' });
-  if (!settings.ai) settings.ai = { provider: 'gemini', model: 'gemini-2.0-flash', apiKey: '' };
+  if (!settings.ai) settings.ai = { provider: 'anthropic', model: 'claude-haiku-4-5', apiKey: '' };
 
-  /** AI provider catalog — models + where to get a key (kept in sync with chat.js). */
+  /** المساعد مثبّت على Claude فقط (Anthropic). لا يمكن تغيير المزوّد. */
   const AI_PROVIDERS = {
-    gemini: {
-      label: 'Google Gemini',
-      models: ['gemini-2.0-flash', 'gemini-2.5-flash'],
-      hint: 'مفتاح مجاني من Google AI Studio — يبدأ بـ AIza…',
-    },
-    openai: {
-      label: 'OpenAI — ChatGPT',
-      models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
-      hint: 'من platform.openai.com/api-keys — يبدأ بـ sk-…',
-    },
     anthropic: {
       label: 'Anthropic — Claude',
       models: ['claude-haiku-4-5', 'claude-sonnet-5', 'claude-opus-4-8'],
-      hint: 'من console.anthropic.com — يبدأ بـ sk-ant-…',
+      hint: 'الأفضل استخدام الخادم الوسيط بالأعلى. هذا المفتاح المباشر احتياطي فقط (يبدأ بـ sk-ant-…).',
     },
   };
   let view = 'cpu';            // category key | 'all'
@@ -272,9 +262,9 @@
     ].join('\n');
   }
 
-  /** Fill the model dropdown for the chosen provider (keep current if valid). */
-  function renderModelOptions(provider, selected) {
-    const cfg = AI_PROVIDERS[provider] || AI_PROVIDERS.gemini;
+  /** Fill the Claude model dropdown (provider is locked to Anthropic). */
+  function renderModelOptions(selected) {
+    const cfg = AI_PROVIDERS.anthropic;
     $('#setModel').innerHTML = cfg.models
       .map((m) => `<option value="${m}" ${m === selected ? 'selected' : ''}>${m}</option>`).join('');
     if (!cfg.models.includes(selected)) $('#setModel').value = cfg.models[0];
@@ -283,9 +273,9 @@
 
   function fillSettingsForm() {
     $('#setWhatsapp').value = settings.whatsappPhone || '';
-    const ai = settings.ai;
-    $('#setProvider').value = ai.provider || 'gemini';
-    renderModelOptions($('#setProvider').value, ai.model);
+    const ai = settings.ai || {};
+    renderModelOptions(ai.model);
+    $('#setProxyUrl').value = ai.proxyUrl || '';
     $('#setApiKey').value = ai.apiKey || '';
   }
 
@@ -294,8 +284,9 @@
     if (phone.length < 10) { toast('اكتب رقمًا دوليًا صحيحًا، مثال: 966512345678'); return; }
     settings.whatsappPhone = phone;
     settings.ai = {
-      provider: $('#setProvider').value,
+      provider: 'anthropic',                 // locked — Claude only
       model: $('#setModel').value,
+      proxyUrl: $('#setProxyUrl').value.trim(),
       apiKey: $('#setApiKey').value.trim(),
     };
     try {
@@ -638,7 +629,8 @@
       db = normalizeInv(inv.val());
       const st = await FB.db().ref('settings').once('value');
       settings = st.val() || structuredClone(globalThis.ITQAN_SETTINGS || {});
-      if (!settings.ai) settings.ai = { provider: 'gemini', model: 'gemini-2.0-flash', apiKey: '' };
+      if (!settings.ai) settings.ai = { provider: 'anthropic', model: 'claude-haiku-4-5', apiKey: '' };
+      settings.ai.provider = 'anthropic';   // enforce Claude-only even on old cloud data
       renderAll();
     } catch (e) {
       console.error(e);
@@ -839,7 +831,7 @@
     $('#settingsForm').addEventListener('submit', (e) => { e.preventDefault(); saveSettings(); });
     $('#setCancel').addEventListener('click', () => $('#settingsDialog').close());
     $('#setClose').addEventListener('click', () => $('#settingsDialog').close());
-    $('#setProvider').addEventListener('change', () => renderModelOptions($('#setProvider').value, ''));
+    // provider is locked to Claude — no provider selector to wire up
 
     $('#searchInput').addEventListener('input', (e) => { query = e.target.value.trim(); renderNav(); renderTable(); });
     $('#sortSel').addEventListener('change', (e) => { sortMode = e.target.value; renderTable(); });
