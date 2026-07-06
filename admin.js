@@ -208,13 +208,35 @@
     return true;
   }
 
+  /** Resize + compress an image file to a small JPEG data URL (browser canvas). */
+  function fileToDataURL(file, maxDim = 900, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (Math.max(width, height) > maxDim) {
+          const s = maxDim / Math.max(width, height);
+          width = Math.round(width * s); height = Math.round(height * s);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+      img.src = url;
+    });
+  }
+
   async function saveImage(file, partId) {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
-    // Cloud mode: upload to Firebase Storage and store the public download URL.
+    // Cloud mode: store a compressed inline data URL in the database itself.
+    // Avoids Firebase Storage (which needs auth + the Blaze plan) entirely, so
+    // images always show on the customer page with no extra setup.
     if (fbMode) {
-      const ref = FB.storage().ref().child(`images/${partId}.${ext}`);
-      const snap = await ref.put(file);
-      return await snap.ref.getDownloadURL();
+      return await fileToDataURL(file);
     }
     // Local mode: copy the file into the project's images/ folder.
     const path = `images/${partId}.${ext}`;

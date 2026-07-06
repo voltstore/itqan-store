@@ -122,7 +122,9 @@
       '{"build": {"cpu": "id", "motherboard": "id", "gpu": "id", "ram": "id", "storage": "id", "psu": "id", "case": "id", "cooler": "id"}}',
       '```',
       '5) استخدم قيم id الحقيقية من المخزون فقط داخل كتلة JSON.',
-      '6) الأسعار كلها بالريال السعودي (SAR).',
+      '6) الأسعار كلها بالريال السعودي (SAR)، وانسخ السعر والمواصفات حرفيًا من المخزون — لا تخترع سعرًا ولا مواصفة.',
+      '7) قبل إرسال أي تجميعة: راجعها ذهنيًا بند بند مقابل قواعد التوافق الخمسة أعلاه. إن فشل أي بند، بدّل القطعة بأخرى من المخزون تنجح — لا تقترح تجميعة غير متوافقة أبدًا.',
+      '8) إذا كان المخزون لا يحتوي قطعة مناسبة لبند ما، أخبر العميل بصراحة بدل اختراع قطعة.',
       '',
       `مخزون المتجر الحالي (JSON): ${inventory}`,
     ].join('\n');
@@ -197,6 +199,58 @@
     return { cleanText: text.replace(match[0], '').trim(), build };
   }
 
+  /** Localized category label (from the shared CATEGORY_META). */
+  const catLabel = (cat) => {
+    const m = (typeof CATEGORY_META !== 'undefined' && CATEGORY_META[cat]) ? CATEGORY_META[cat].label : null;
+    return m ? (m[getLang()] || m.ar) : cat;
+  };
+
+  /** Compact spec line for a resolved part (real store data, not AI text). */
+  function partSpecs(cat, p) {
+    const en = getLang() === 'en';
+    const W = (n) => `${n}W`;
+    const iG = p.integratedGraphics ? (en ? 'iGPU' : 'كرت مدمج') : null;
+    const map = {
+      cpu: [p.socket, p.tdpWatts && W(p.tdpWatts), iG],
+      motherboard: [p.socket, p.ramType, p.formFactor],
+      gpu: [p.powerDraw && W(p.powerDraw), p.recommendedPSU && (en ? `PSU ${p.recommendedPSU}W` : `مزود ${p.recommendedPSU}W`)],
+      ram: [p.capacity, p.type, p.speed],
+      storage: [p.capacity, p.type],
+      psu: [p.wattage && W(p.wattage), p.rating],
+      case: [(p.formFactorSupport || []).join(', ')],
+      cooler: [p.tdpSupport && (en ? `up to ${p.tdpSupport}W` : `حتى ${p.tdpSupport}W`)],
+    };
+    return (map[cat] || []).filter(Boolean).join(' · ');
+  }
+
+  /** A long, copy/paste-ready specs + prices message (WhatsApp-friendly). */
+  function buildDetailMessage(resolved, total, ok, summary) {
+    const en = getLang() === 'en';
+    const lines = [];
+    lines.push(en ? '🖥️ Itqan — Suggested PC Build' : '🖥️ اتقان — تجميعة مقترحة');
+    lines.push('━━━━━━━━━━━━━━━━━━━━');
+    for (const cat of CATEGORY_ORDER) {
+      const p = resolved[cat];
+      if (!p) continue;
+      const specs = partSpecs(cat, p);
+      lines.push(`• ${catLabel(cat)}: ${p.name} — ${fmtSAR(p.price)}`);
+      if (specs) lines.push(`   ${specs}`);
+    }
+    lines.push('━━━━━━━━━━━━━━━━━━━━');
+    lines.push((en ? '💰 Total: ' : '💰 الإجمالي: ') + fmtSAR(total));
+    lines.push(ok
+      ? (en ? '✅ Compatibility: verified by Itqan engine' : '✅ التوافق: مفحوص ومضمون بمحرك اتقان')
+      : (en ? '⚠️ Note: ' : '⚠️ ملاحظة توافق: ') + fmt(summary.msgCode, summary.msgParams));
+    lines.push('');
+    lines.push(en ? '📦 Order from Itqan Store' : '📦 الطلب من متجر اتقان');
+    return lines.join('\n');
+  }
+
+  function storePhone() {
+    const s = (window.ItqanApp.getSettings && window.ItqanApp.getSettings()) || {};
+    return (s.whatsappPhone || '966542585400').replace(/[^0-9]/g, '');
+  }
+
   function renderBuildCard(build) {
     const db = window.ItqanApp.getDb();
     const resolved = {};
@@ -210,8 +264,11 @@
     const count = Object.keys(resolved).length;
     if (count === 0) return;
 
+    // Verification: recompute compatibility from the REAL resolved parts.
     const summary = Compat.buildSummary(resolved, CATEGORY_ORDER);
     const ok = summary.status === 'ok';
+    const message = buildDetailMessage(resolved, total, ok, summary);
+
     const card = document.createElement('div');
     card.className = 'chat-build-card';
     card.innerHTML = `
@@ -219,11 +276,26 @@
       <p class="chat-build-card__status" data-status="${ok ? 'ok' : 'warn'}">
         ${ok ? esc(L('chat.buildOk')) : esc(fmt('chat.buildWarn', { a: fmt(summary.msgCode, summary.msgParams) }))}
       </p>
-      <button type="button" class="btn btn--primary chat-build-card__apply">${esc(L('chat.apply'))}</button>`;
+      <textarea class="chat-build-card__specs" readonly rows="9" dir="auto" aria-label="${esc(L('chat.specsLabel'))}">${esc(message)}</textarea>
+      <div class="chat-build-card__actions">
+        <button type="button" class="btn btn--primary chat-build-card__apply">${esc(L('chat.apply'))}</button>
+        <button type="button" class="btn btn--ghost btn--small chat-build-card__copy">${esc(L('chat.copy'))}</button>
+        <a class="btn btn--wa btn--small chat-build-card__wa" target="_blank" rel="noopener"
+           href="https://wa.me/${storePhone()}?text=${encodeURIComponent(message)}">${esc(L('chat.sendWa'))}</a>
+      </div>`;
+
     card.querySelector('.chat-build-card__apply').addEventListener('click', () => {
       window.ItqanApp.applyBuild(build);
       closeChat();
     });
+    const copyBtn = card.querySelector('.chat-build-card__copy');
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(message); }
+      catch { const t = card.querySelector('.chat-build-card__specs'); t.focus(); t.select(); document.execCommand('copy'); }
+      copyBtn.textContent = L('chat.copied');
+      setTimeout(() => { copyBtn.textContent = L('chat.copy'); }, 1800);
+    });
+
     els.messages.appendChild(card);
     scrollToBottom();
   }
