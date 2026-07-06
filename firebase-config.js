@@ -2,22 +2,18 @@
  * =============================================================================
  * ITQAN STORE — FIREBASE CONFIG (firebase-config.js)
  * =============================================================================
- * إعداد مشروع Firebase الخاص بالمتجر (مشروع imam-warsh).
- *
- * ⚠️ عبّئ القيم الثلاث المحجوبة بين الأقواس [ ] بقيمها الحقيقية من:
- *    Firebase Console → ⚙️ Project settings → General → Your apps → </> → Config
- *      - apiKey            (يبدأ بـ AIza…)  ← عام وليس سريًا
- *      - messagingSenderId (أرقام)
- *      - appId             (1:...:web:...)
- * ما دامت الأقواس [ ] موجودة، يعمل الموقع بالبيانات المحلية (بدون Firebase).
+ * إعداد مشروع Firebase الخاص بالمتجر (مشروع imam-warsh) — مفعّل.
+ * مفتاح Firebase Web عام بطبيعته (يظهر في كود أي موقع)؛ الحماية من قواعد الأمان.
+ * لإيقاف Firebase مؤقتًا والعودة للبيانات المحلية: أعِد apiKey إلى "[API_KEY]".
  * =============================================================================
  */
 globalThis.ITQAN_FIREBASE = {
-  apiKey: "[API_KEY]",
+  apiKey: "AIzaSyAC9BzBpw66oBDriZoi9A5zsThKLFZiNv8",
   authDomain: "imam-warsh.firebaseapp.com",
   databaseURL: "https://imam-warsh-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "imam-warsh",
-  storageBucket: "imam-warsh.appspot.com",
-  messagingSenderId: "[SENDER_ID]",
-  appId: "[APP_ID]"
+  storageBucket: "imam-warsh.firebasestorage.app",
+  messagingSenderId: "898520924315",
+  appId: "1:898520924315:web:b74dbd20340ef53b0a463e",
+  measurementId: "G-YGY41LQF8J"
 };
