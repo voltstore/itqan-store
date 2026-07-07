@@ -111,13 +111,15 @@
     .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 12px; }
     .stat {
       background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-      padding: 15px 16px; display: grid; gap: 3px;
+      padding: 16px 17px; display: grid; gap: 3px;
       position: relative; overflow: hidden;
+      transition: transform var(--dur-fast) var(--spring), box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
     }
-    .stat::before { content: ''; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .8; }
-    .stat b { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-1); border-color: var(--border-strong); }
+    .stat::before { content: ''; position: absolute; inset-inline-start: 0; top: 0; bottom: 0; width: 3px; background: var(--accent-grad); }
+    .stat b { font-size: 1.55rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
     .stat span { font-size: 0.76rem; color: var(--text-2); }
-    .stat code { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em; color: var(--text-2); opacity: .55; }
+    .stat code { font-family: var(--mono); font-size: 0.56rem; letter-spacing: 0.16em; color: var(--accent); opacity: .7; }
 
     /* section header row above the table */
     .tbl-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -180,7 +182,7 @@
       border: 1px solid var(--border-strong); border-radius: 16px;
       padding: 0; box-shadow: var(--shadow-2);
     }
-    dialog.pd::backdrop { background: rgba(23,16,9,.62); backdrop-filter: blur(4px); }
+    dialog.pd::backdrop { background: rgba(10,10,14,.62); backdrop-filter: blur(4px); }
     .pd-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
     .pd-head h3 { font-size: 1.05rem; font-weight: 700; }
     .pd-body { padding: 18px 20px; display: grid; gap: 14px; max-height: 66vh; overflow-y: auto; }
@@ -245,8 +247,10 @@
     }
 
     /* login gate (Firebase Auth) */
-    .login-gate { position: fixed; inset: 0; z-index: 500; display: grid; place-items: center; background: var(--bg); padding: 20px; }
-    .login-card { width: min(380px, 100%); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-2); padding: 30px; display: grid; gap: 12px; }
+    .login-gate { position: fixed; inset: 0; z-index: 500; display: grid; place-items: center; padding: 20px;
+      background: radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--accent) 10%, var(--bg)), var(--bg) 62%); }
+    .login-card { position: relative; width: min(380px, 100%); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-2); padding: 30px; display: grid; gap: 12px; overflow: hidden; }
+    .login-card::before { content: ''; position: absolute; top: 0; inset-inline: 0; height: 3px; background: var(--accent-grad); }
     .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
     .login-brand svg { width: 30px; height: 30px; }
     .login-brand b { font-weight: 700; }
