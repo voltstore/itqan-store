@@ -1,10 +1,10 @@
 /* =============================================================================
    ITQAN STORE — DESIGN SYSTEM v2 (style.css)
    -----------------------------------------------------------------------------
-   Aesthetic: "precision atelier" — a flagship PC-builder brand. Deep graphite-
-   navy DARK theme by default (gaming heritage), warm ivory LIGHT theme via
-   toggle. One confident amber/copper accent. Latin text renders in Space
-   Grotesk, Arabic in IBM Plex Sans Arabic, engineering labels in IBM Plex Mono.
+   Aesthetic: "precision atelier" — a flagship PC-builder brand. Crisp white
+   LIGHT theme by default, near-black onyx DARK theme via toggle. One confident
+   brand-red accent (#E63030). Latin text renders in Space Grotesk, Arabic in
+   IBM Plex Sans Arabic, engineering labels in IBM Plex Mono.
    Motion: transform/opacity only, 150–300ms, spring-flavored curves, all
    disabled under prefers-reduced-motion. WCAG AA contrast in BOTH themes.
    ========================================================================== */
@@ -13,36 +13,36 @@
    Brand palette: WHITE (warm ivory) + ORANGE (burnt/citrus) + BROWN (espresso
    ink). Light is the DEFAULT; dark is a warm espresso variant, not navy. */
 :root {
-  /* LIGHT (default) — white + orange + brown */
-  --bg: #faf7f2;
-  --bg-raised: #fffdf9;
+  /* LIGHT (default) — white + red + charcoal (elegant, high-contrast) */
+  --bg: #f6f6f7;
+  --bg-raised: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f4ece1;
-  --text: #2c2013;
-  --text-2: #6f5f4c;
-  --border: #eadfd0;
-  --border-strong: #d4c3ab;
+  --surface-2: #eeeef0;
+  --text: #16161a;
+  --text-2: #64646d;
+  --border: #e7e7ea;
+  --border-strong: #d3d3d8;
 
-  --accent: #c2410c;             /* burnt orange — 4.9:1 on white */
-  --accent-strong: #9a3412;
-  --accent-deep: #7c2d12;
+  --accent: #cc2027;             /* refined red — ~5:1 on white */
+  --accent-strong: #a81a20;
+  --accent-deep: #85141a;
   --accent-contrast: #ffffff;
-  --accent-soft: rgba(234, 88, 12, 0.08);
-  --accent-line: rgba(234, 88, 12, 0.35);
-  --accent-glow: 0 10px 32px rgba(234, 88, 12, 0.3);
-  --accent-grad: linear-gradient(135deg, #ea580c, #b8430a);
-  --accent-bright: #f97316;      /* decorative only (lines, glows, display) */
+  --accent-soft: rgba(230, 48, 48, 0.08);
+  --accent-line: rgba(214, 32, 40, 0.32);
+  --accent-glow: 0 10px 30px rgba(214, 32, 40, 0.26);
+  --accent-grad: linear-gradient(135deg, #e12b30, #b81d24);
+  --accent-bright: #e63030;      /* brand red — decorative (lines, glows, display) */
 
-  --danger: #b3261e;
-  --danger-soft: rgba(179, 38, 30, 0.07);
+  --danger: #b3141b;
+  --danger-soft: rgba(179, 20, 27, 0.07);
   --success: #15803d;
   --success-soft: rgba(21, 128, 61, 0.09);
-  --warning: #92610a;
-  --warning-soft: rgba(146, 97, 10, 0.1);
+  --warning: #b45309;
+  --warning-soft: rgba(180, 83, 9, 0.1);
 
-  --shadow-1: 0 1px 2px rgba(61, 43, 26, 0.06), 0 4px 14px rgba(61, 43, 26, 0.07);
-  --shadow-2: 0 10px 26px rgba(61, 43, 26, 0.1), 0 24px 60px rgba(61, 43, 26, 0.12);
-  --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  --shadow-1: 0 1px 2px rgba(15, 15, 20, 0.06), 0 4px 14px rgba(15, 15, 20, 0.07);
+  --shadow-2: 0 10px 26px rgba(15, 15, 20, 0.1), 0 24px 60px rgba(15, 15, 20, 0.12);
+  --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.9);
 
   --radius-s: 6px;
   --radius-m: 12px;
@@ -63,36 +63,36 @@
 }
 
 [data-theme='dark'] {
-  /* ESPRESSO — warm brown darks, same orange soul */
-  --bg: #171009;
-  --bg-raised: #1d150c;
-  --surface: #241a10;
-  --surface-2: #2f2214;
-  --text: #f6eee2;
-  --text-2: #b5a189;
-  --border: #392b1b;
-  --border-strong: #4e3b26;
+  /* ONYX — near-black darks with bright red soul */
+  --bg: #0a0a0c;
+  --bg-raised: #121216;
+  --surface: #16161b;
+  --surface-2: #1f1f26;
+  --text: #f3f3f5;
+  --text-2: #9d9da7;
+  --border: #29292f;
+  --border-strong: #3a3a42;
 
-  --accent: #ffa245;
-  --accent-strong: #ffb96e;
-  --accent-deep: #f97316;
-  --accent-contrast: #2b1503;
-  --accent-soft: rgba(255, 162, 69, 0.09);
-  --accent-line: rgba(255, 162, 69, 0.35);
-  --accent-glow: 0 8px 32px rgba(249, 115, 22, 0.25);
-  --accent-grad: linear-gradient(135deg, #ffb96e, #f97316);
-  --accent-bright: #ffa245;
+  --accent: #ff5c5c;
+  --accent-strong: #ff8585;
+  --accent-deep: #f4433a;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(255, 92, 92, 0.1);
+  --accent-line: rgba(255, 92, 92, 0.3);
+  --accent-glow: 0 8px 30px rgba(244, 67, 58, 0.32);
+  --accent-grad: linear-gradient(135deg, #f04148, #c21f26);
+  --accent-bright: #ff5c5c;
 
-  --danger: #ff8a7a;
-  --danger-soft: rgba(255, 138, 122, 0.09);
-  --success: #6ad493;
-  --success-soft: rgba(106, 212, 147, 0.1);
-  --warning: #ffce6b;
-  --warning-soft: rgba(255, 206, 107, 0.1);
+  --danger: #ff8a8a;
+  --danger-soft: rgba(255, 138, 138, 0.1);
+  --success: #4ade80;
+  --success-soft: rgba(74, 222, 128, 0.1);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.12);
 
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 4px 14px rgba(0, 0, 0, 0.35);
-  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.5), 0 24px 64px rgba(0, 0, 0, 0.45);
-  --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.55), 0 24px 64px rgba(0, 0, 0, 0.5);
+  --card-edge: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
   color-scheme: dark;
 }
@@ -350,27 +350,27 @@ code { font-family: var(--mono); }
 .rig::before {
   content: ''; position: absolute; inset: -14%;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.2), transparent 62%);
+  background: radial-gradient(circle, rgba(230, 48, 48, 0.2), transparent 62%);
   pointer-events: none;
 }
 
-/* The tower is deliberately rendered in fixed espresso+orange (matching the
-   product artwork) so it stays rich and vivid in BOTH themes. */
-.rig__tower { position: relative; width: 100%; height: auto; filter: drop-shadow(0 26px 48px rgba(61, 43, 26, 0.35)); }
-.rig__shell { fill: #2c1f12; stroke: #54402a; stroke-width: 2; }
-.rig__glass { fill: rgba(249, 115, 22, 0.12); stroke: #fb923c; stroke-width: 1.5; }
-.rig__glare { stroke: #fb923c; stroke-width: 1; opacity: 0.35; }
-.rig__hub { fill: #fb923c; }
+/* The tower is rendered in fixed onyx + brand-red so it stays rich and vivid
+   in BOTH themes. */
+.rig__tower { position: relative; width: 100%; height: auto; filter: drop-shadow(0 26px 48px rgba(10, 10, 12, 0.4)); }
+.rig__shell { fill: #17171b; stroke: #34343c; stroke-width: 2; }
+.rig__glass { fill: rgba(230, 48, 48, 0.12); stroke: #e63030; stroke-width: 1.5; }
+.rig__glare { stroke: #e63030; stroke-width: 1; opacity: 0.35; }
+.rig__hub { fill: #e63030; }
 .rig__fan {
-  fill: none; stroke: #fb923c; stroke-width: 2.5;
+  fill: none; stroke: #e63030; stroke-width: 2.5;
   stroke-dasharray: 14 10; stroke-linecap: round;
   transform-box: fill-box; transform-origin: center;
 }
 .rig__fan--spin { animation: fan-spin 7s linear infinite; }
 .rig__fan--spin2 { animation: fan-spin 5s linear infinite reverse; opacity: 0.8; }
 @keyframes fan-spin { to { transform: rotate(360deg); } }
-.rig__slot { fill: #54402a; }
-.rig__vent { fill: none; stroke: #54402a; stroke-width: 2; stroke-dasharray: 3 6; }
+.rig__slot { fill: #34343c; }
+.rig__vent { fill: none; stroke: #34343c; stroke-width: 2; stroke-dasharray: 3 6; }
 .rig__led { fill: #5bd992; }
 
 .rig__chip {
@@ -617,7 +617,7 @@ code { font-family: var(--mono); }
 
 .part-card__media {
   position: relative; display: block; overflow: hidden;
-  background: linear-gradient(165deg, #2a1d11, #43301b);
+  background: linear-gradient(165deg, #16161b, #24242c);
   border-bottom: 1px solid var(--border);
 }
 .part-card__media img {
