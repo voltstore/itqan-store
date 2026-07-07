@@ -61,6 +61,11 @@
     els.cartTotal = $('#cartTotal');
     els.cartCompat = $('#cartCompat');
     els.exportBtn = $('#exportBtn');
+    els.exportDialog = $('#exportDialog');
+    els.exportText = $('#exportText');
+    els.exportCopy = $('#exportCopy');
+    els.exportWa = $('#exportWa');
+    els.exportClose = $('#exportClose');
     els.toast = $('#toast');
   }
 
@@ -542,28 +547,60 @@
    * WHATSAPP EXPORT
    * ==================================================================== */
 
+  /** Compact spec line for a part (real store data). */
+  function partSpecLine(cat, p) {
+    const en = lang === 'en';
+    const W = (n) => `${n}W`;
+    const iG = p.integratedGraphics ? (en ? 'iGPU' : 'كرت مدمج') : null;
+    const map = {
+      cpu: [p.socket, p.tdpWatts && W(p.tdpWatts), iG],
+      motherboard: [p.socket, p.ramType, p.formFactor],
+      gpu: [p.powerDraw && W(p.powerDraw), p.recommendedPSU && (en ? `PSU ${p.recommendedPSU}W` : `مزود ${p.recommendedPSU}W`)],
+      ram: [p.capacity, p.type, p.speed],
+      storage: [p.capacity, p.type],
+      psu: [p.wattage && W(p.wattage), p.rating],
+      case: [(p.formFactorSupport || []).join(', ')],
+      cooler: [p.tdpSupport && (en ? `up to ${p.tdpSupport}W` : `حتى ${p.tdpSupport}W`)],
+    };
+    return (map[cat] || []).filter(Boolean).join(' · ');
+  }
+
   function buildWhatsAppMessage() {
     const s = Compat.buildSummary(selection, CATEGORY_ORDER);
     const chosen = CATEGORY_ORDER.filter((c) => selection[c]);
 
-    const lines = [
-      L('wa.header'),
-      '',
-      L('wa.greeting'),
-      '',
-      ...chosen.map((c) => `• ${catLabel(c)}: ${selection[c].name} — ${fmtSAR(selection[c].price)}`),
-      '',
-      '─────────────',
-      fmt('wa.total', { a: fmtSAR(s.totalPrice) }),
-      s.status === 'ok' ? L('wa.ok') : fmt('wa.note', { a: fmt(s.msgCode, s.msgParams) }),
-    ];
+    const lines = [L('wa.header'), '━━━━━━━━━━━━━━━━━━━━', L('wa.greeting'), ''];
+    for (const c of chosen) {
+      const p = selection[c];
+      lines.push(`• ${catLabel(c)}: ${p.name} — ${fmtSAR(p.price)}`);
+      const specs = partSpecLine(c, p);
+      if (specs) lines.push(`   ${specs}`);
+    }
+    lines.push('━━━━━━━━━━━━━━━━━━━━');
+    lines.push(fmt('wa.total', { a: fmtSAR(s.totalPrice) }));
+    lines.push(s.status === 'ok' ? L('wa.ok') : fmt('wa.note', { a: fmt(s.msgCode, s.msgParams) }));
+    lines.push('');
+    lines.push(L('wa.footer'));
     return lines.join('\n');
   }
 
+  /** Show the export dialog: a long message the user can copy OR send to WhatsApp. */
   function exportToWhatsApp() {
+    if (CATEGORY_ORDER.every((c) => !selection[c])) { showToast(L('toast.emptyCart')); return; }
+    const msg = buildWhatsAppMessage();
     const phone = (storeSettings && storeSettings.whatsappPhone) || WA_FALLBACK;
-    const text = encodeURIComponent(buildWhatsAppMessage());
-    window.open(`https://wa.me/${phone}?text=${text}`, '_blank', 'noopener');
+    els.exportText.value = msg;
+    els.exportWa.href = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    els.exportCopy.textContent = L('wa.copy');
+    if (typeof els.exportDialog.showModal === 'function') els.exportDialog.showModal();
+    else window.open(els.exportWa.href, '_blank', 'noopener'); // fallback
+  }
+
+  async function copyExport() {
+    try { await navigator.clipboard.writeText(els.exportText.value); }
+    catch { els.exportText.focus(); els.exportText.select(); document.execCommand('copy'); }
+    els.exportCopy.textContent = L('wa.copied');
+    setTimeout(() => { els.exportCopy.textContent = L('wa.copy'); }, 1800);
   }
 
   /* ======================================================================
@@ -636,6 +673,9 @@
       if (btn) deselectPart(btn.dataset.remove);
     });
     els.exportBtn.addEventListener('click', exportToWhatsApp);
+    els.exportCopy.addEventListener('click', copyExport);
+    els.exportClose.addEventListener('click', () => els.exportDialog.close());
+    els.exportWa.addEventListener('click', () => els.exportDialog.close());
 
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;

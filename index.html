@@ -293,6 +293,21 @@
   </section>
 
   <!-- Toast (transient feedback) -->
+  <!-- ===================================================== EXPORT DIALOG -->
+  <dialog id="exportDialog" class="export-modal">
+    <div class="export-modal__head">
+      <p class="export-modal__title" data-i18n="wa.exportTitle">ملخّص تجميعتك</p>
+      <button type="button" id="exportClose" class="chat-head-btn" data-i18n-aria="chat.close" aria-label="إغلاق">✕</button>
+    </div>
+    <p class="export-modal__hint" data-i18n="wa.exportHint">انسخ الرسالة أو أرسلها مباشرة عبر واتساب.</p>
+    <label class="sr-only" for="exportText" data-i18n="wa.exportTitle">ملخّص تجميعتك</label>
+    <textarea id="exportText" class="export-modal__text" readonly rows="12" dir="auto"></textarea>
+    <div class="export-modal__actions">
+      <a id="exportWa" class="btn btn--wa" href="#" target="_blank" rel="noopener" data-i18n="wa.send">إرسال عبر واتساب</a>
+      <button type="button" id="exportCopy" class="btn btn--ghost" data-i18n="wa.copy">نسخ الرسالة</button>
+    </div>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Firebase (optional cloud backend). If firebase-config.js holds a real

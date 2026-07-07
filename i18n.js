@@ -121,6 +121,7 @@ const I18N = {
     'toast.picked': 'تم اختيار {a} — التالي: {b}',
     'toast.pickedLast': 'تم اختيار {a}',
     'toast.applied': 'تم تطبيق التجميعة المقترحة في البنّاء ✓',
+    'toast.emptyCart': 'أضف قطعًا أولًا قبل التصدير',
 
     /* whatsapp export */
     'wa.header': '🖥️ *متجر اتقان — طلب تجميعة*',
@@ -128,6 +129,12 @@ const I18N = {
     'wa.total': '💰 *الإجمالي: {a}*',
     'wa.ok': '✅ التجميعة متوافقة (تم الفحص عبر محرك توافق اتقان)',
     'wa.note': '⚠️ ملاحظة: {a}',
+    'wa.footer': '📦 بانتظار تأكيدكم — شكرًا لاختياركم اتقان.',
+    'wa.exportTitle': 'ملخّص تجميعتك',
+    'wa.exportHint': 'انسخ الرسالة كاملة، أو أرسلها مباشرة عبر واتساب.',
+    'wa.copy': 'نسخ الرسالة',
+    'wa.copied': 'تم النسخ ✓',
+    'wa.send': 'إرسال عبر واتساب',
 
     /* footer */
     'footer.tag': 'متجر سعودي متخصص في قطع الكمبيوتر والتجميعات الاحترافية — نجمّع، نفحص، ونشحن لكل مناطق المملكة.',
@@ -282,12 +289,19 @@ const I18N = {
     'toast.picked': '{a} selected — next: {b}',
     'toast.pickedLast': '{a} selected',
     'toast.applied': 'Suggested build applied to the configurator ✓',
+    'toast.emptyCart': 'Add parts before exporting',
 
     'wa.header': '🖥️ *Itqan Store — Build Order*',
     'wa.greeting': 'Hello! I’d like to order the following build:',
     'wa.total': '💰 *Total: {a}*',
     'wa.ok': '✅ Build verified compatible (Itqan compatibility engine)',
     'wa.note': '⚠️ Note: {a}',
+    'wa.footer': '📦 Awaiting your confirmation — thank you for choosing Itqan.',
+    'wa.exportTitle': 'Your build summary',
+    'wa.exportHint': 'Copy the full message, or send it straight to WhatsApp.',
+    'wa.copy': 'Copy message',
+    'wa.copied': 'Copied ✓',
+    'wa.send': 'Send via WhatsApp',
 
     'footer.tag': 'A Saudi specialist store for PC parts and professional custom builds — we assemble, test, and ship kingdom-wide.',
     'footer.linksT': 'Links',
