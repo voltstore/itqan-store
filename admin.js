@@ -497,9 +497,9 @@
       const actions = `
         <td>
           <div class="row-actions">
-            <button type="button" class="rb" data-edit="${p.id}" data-cat="${cat}" aria-label="تعديل ${esc(p.name)}" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-            <button type="button" class="rb" data-dup="${p.id}" data-cat="${cat}" aria-label="نسخ ${esc(p.name)}" title="نسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg></button>
-            <button type="button" class="rb rb--del" data-del="${p.id}" data-cat="${cat}" aria-label="حذف ${esc(p.name)}" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2m1 0-1 14H8L7 6"/></svg></button>
+            <button type="button" class="rb" data-edit="${esc(p.id)}" data-cat="${esc(cat)}" aria-label="تعديل ${esc(p.name)}" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+            <button type="button" class="rb" data-dup="${esc(p.id)}" data-cat="${esc(cat)}" aria-label="نسخ ${esc(p.name)}" title="نسخ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg></button>
+            <button type="button" class="rb rb--del" data-del="${esc(p.id)}" data-cat="${esc(cat)}" aria-label="حذف ${esc(p.name)}" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2m1 0-1 14H8L7 6"/></svg></button>
           </div>
         </td>`;
 

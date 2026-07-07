@@ -104,6 +104,12 @@
       .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
   }
 
+  /** Only allow http(s) links; blocks javascript:/data: URLs (stored-XSS guard). */
+  function safeUrl(u) {
+    const s = String(u == null ? '' : u).trim();
+    return /^https?:\/\//i.test(s) ? s : '#';
+  }
+
   /** Format an engine reason {code, params} in the active language. */
   function reasonText(reason) {
     return fmt(`r.${reason.code}`, reason.params);
@@ -313,7 +319,7 @@
 
       return `
         <article class="${cardClass}" style="--i:${i}">
-          <button type="button" class="part-card__btn" data-part="${part.id}"
+          <button type="button" class="part-card__btn" data-part="${esc(part.id)}"
                   aria-expanded="${openReasonId === part.id ? 'true' : 'false'}"
                   aria-label="${esc(aria)}">
             <span class="part-card__media">
@@ -468,8 +474,8 @@
       .map((s) => {
         const p = cat[s.platform];
         const name = p.label[lang] || p.label.ar;
-        return `<a class="social-link" href="${esc(s.url)}" target="_blank" rel="noopener"
-                   style="--sc:${p.color}" aria-label="${esc(name)}" title="${esc(name)}">
+        return `<a class="social-link" href="${esc(safeUrl(s.url))}" target="_blank" rel="noopener"
+                   style="--sc:${esc(p.color)}" aria-label="${esc(name)}" title="${esc(name)}">
                   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${p.svg}</svg>
                 </a>`;
       }).join('');
